@@ -62,11 +62,14 @@ def coordonnees(liste):
         
         if liste[j][0] == "ATOM" :
             while liste[j][0] == "ATOM" :   
-                dico [' '.join(liste[j][0:2])] = map(float,liste[j][6:9])
+                #dico [' '.join(liste[j][0:2])] = map(float,liste[j][6:9])
+                string = liste[j][3] + "-"+liste[j][5]
+                dico [string] = map(float,liste[j][6:9])
                 j+=1
             res["modele"+str(modele)] = dico
             modele +=1
         j+=1
+    
     return res
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -89,11 +92,32 @@ def main(nom_fichier = "1cll.pdb") :
     #print fichier
     #print details(fichier)  
     #print lecture_pdb_bis(fichier)    
-    #print coordonnees(fichier)
-    print atome(fichier)
+    print coordonnees(fichier)
+    #print atome(fichier)
 
 main()
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def RMSD():
-    pass    
+def RMSD(coordonnees, liste_atomes):
+    """
+    J en sais rien !
+    """
+    def calcul(P1,P2):
+        return pow((P1[0]-P2[0]),2)+pow((P1[1]-P2[1]),2)+pow((P1[2]-P2[2]),2)
+    
+    def trie(atome, liste):
+        res = list()
+        for i in liste : 
+            if i["nomAtome"] == atome : 
+                res.append(i)
+        return res
+    
+    trier = trie("CA",liste_atomes)
+    
+        
+    
+fichier = lire_pdb("1cll.pdb")
+coord = coordonnees(fichier)
+at = atome(fichier)
+RMSD (coord, at)
+       
