@@ -4,7 +4,7 @@ Created on Tue Sep 26 10:03:31 2017
 
 @author: 3202002
 """
-
+#Wesh
 
 def lire_pdb(nom_fichier="3pdz.pdb"):
     """
