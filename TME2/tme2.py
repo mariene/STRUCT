@@ -121,7 +121,7 @@ def main(nom_fichier = "1cll.pdb") :
 def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
     
     def calcul(P1,P2):
-        return pow((P1[0]-P2[0]),2)+pow((P1[1]-P2[1]),2)+pow((P1[2]-P2[2]),2)
+        return pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2)
     
     def trie(atome, liste,sel):
         res = list()
@@ -129,17 +129,24 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
             if (i["nomAtome"] == atome) and (i["numeroResidus"] in sel): # and (i not in res) : 
                 res.append(i)
         return res
-        
+    
+    def dico_correp(numero,liste_dico):
+        for i in liste_dico : 
+            if eval(i['numeroResidus']) == numero : 
+                return i
+                
     def coord(dico,liste_coord):
         liste_residus = liste_coord.keys()
         for i in liste_residus : 
             tmp = i.split("-")
             if tmp[0] == dico['nomResidus'] and tmp[1] == dico['numeroResidus']:
+                print i, liste_coord[i]
                 return liste_coord[i]
                 
     somme = 0
     trier1 = trie("CA",liste_atomes_1,sel_p1)
     trier2 = trie("CA",liste_atomes_2,sel_p2)
+
     
     print (len(trier1))
     print (len(trier2))
@@ -149,6 +156,7 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
         for i in range (len(trier1)):
             coord1 = coord(trier1[i],coordonnees_1)
             coord2 = coord(trier2[i],coordonnees_2)
+
             somme = somme + calcul(coord1,coord2)
             #print calcul(coord1,coord2)
     print math.sqrt(somme/len(trier1))
