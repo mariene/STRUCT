@@ -4,7 +4,7 @@ Created on Tue Sep 26 10:03:31 2017
 
 @author: 3202002
 """
-#Wesh
+import math
 
 def lire_pdb(nom_fichier="3pdz.pdb"):
     """
@@ -95,29 +95,54 @@ def main(nom_fichier = "1cll.pdb") :
     print coordonnees(fichier)
     #print atome(fichier)
 
-main()
+#main()
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def RMSD(coordonnees, liste_atomes):
-    """
-    J en sais rien !
-    """
+def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
+    
     def calcul(P1,P2):
         return pow((P1[0]-P2[0]),2)+pow((P1[1]-P2[1]),2)+pow((P1[2]-P2[2]),2)
     
-    def trie(atome, liste):
+    def trie(atome, liste,sel):
         res = list()
         for i in liste : 
-            if i["nomAtome"] == atome : 
+            if (i["nomAtome"] == atome) and (eval(i["numeroResidus"]) in sel) and (i not in res) : 
                 res.append(i)
         return res
-    
-    trier = trie("CA",liste_atomes)
-    
         
+    def coord(dico,liste_coord):
+        liste_residus = liste_coord.keys()
+        for i in liste_residus : 
+            tmp = i.split("-")
+            if tmp[0] == dico['nomResidus'] and tmp[1] == dico['numeroResidus']:
+                return liste_coord[i]
+                
+    somme = 0
+    trier1 = trie("CA",liste_atomes_1,sel_p1)
+    trier2 = trie("CA",liste_atomes_2,sel_p2)
     
-fichier = lire_pdb("1cll.pdb")
-coord = coordonnees(fichier)
-at = atome(fichier)
-RMSD (coord, at)
+    if len(trier1) == len(trier2):
+        for i in range (len(trier1)):
+            coord1 = coord(trier1[i],coordonnees_1)
+            coord2 = coord(trier2[i],coordonnees_2)
+            somme = somme + calcul(coord1,coord2)
+            #print calcul(coord1,coord2)
+    print math.sqrt(somme/len(trier1))
+            
+            
+        
+sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
+sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
+
+fichier1 = lire_pdb("3pdz.pdb")
+fichier2 = lire_pdb("1fcf_aliSeq.pdb")
+
+coord1 = coordonnees(fichier1)
+coord1 = coord1["modele0"]
+at1 = atome(fichier1)
+
+coord2 = coordonnees(fichier2)
+coord2 = coord2["modele0"]
+at2 = atome(fichier2)
+RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
        
