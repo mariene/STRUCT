@@ -15,8 +15,8 @@ def lire_pdb(nom_fichier="3pdz.pdb"):
     fichier = open(nom_fichier, "r")
     liste = []
     for i in fichier:
-        l = ' '.join(i.split(' ')).split()
-        liste.append(l)
+        #l = ' '.join(i.split(' ')).split()
+        liste.append(i)
     fichier.close()
     return liste 
 
@@ -30,13 +30,15 @@ def details(liste):
     
     for l in liste:
         
-        if l[0] == "NUMMDL":
-            dico["nbmodele"] = int(l[1])
-        if l[0] == "EXPDTA":
-            dico["methode"] = ' '.join(l[1:len(l)])
-        if l[0] == "REMARK" : 
+        if l[0:6] == "NUMMDL":
+            dico["nbmodele"] = int(l[10:14])
+        if l[0:6] == "EXPDTA":
+            #dico["methode"] = ' '.join(l[1:len(l)])
+            dico["methode"] = l[10:80]
+        if l[0:6] == "REMARK" : 
             if "RESOLUTION." in l :
-                if ' '.join(l[l.index("RESOLUTION.")+1:len(l)]) == 'NOT APPLICABLE.':
+                #if ' '.join(l[l.index("RESOLUTION.")+1:len(l)]) == 'NOT APPLICABLE.':
+                if 'NOT APPLICABLE' in l:
                     dico["resolution"] = None
                 else :
                     dico["resolution"] = float(l[l.index("RESOLUTION.")+1])
@@ -47,8 +49,9 @@ def details(liste):
 def lecture_pdb_bis(liste):
     dico = dict()
     for l in liste:
-        if l[0] == "DBREF":
-            dico[l[1]] = l[2:len(l)]
+        if l[0:5] == "DBREF":
+            i = ' '.join(l.split(' ')).split()
+            dico[l[7:11]] = i[2:len(i)]
     return dico
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,19 +59,31 @@ def lecture_pdb_bis(liste):
 def coordonnees(liste):
     modele = 0
     res = dict()
-    j =0
-    while j != (len(liste)):
-        dico = dict()
+    dico = dict()
+    for j in range(len(liste)):
         
-        if liste[j][0] == "ATOM" :
-            while liste[j][0] == "ATOM" :   
-                #dico [' '.join(liste[j][0:2])] = map(float,liste[j][6:9])
-                string = liste[j][3] + "-"+liste[j][5]
-                dico [string] = map(float,liste[j][6:9])
-                j+=1
+        #dico = dict()
+        l=liste[j]
+        if l[0:6]=="ENDMDL" :
             res["modele"+str(modele)] = dico
             modele +=1
-        j+=1
+            dico = dict()
+            
+            
+        if l[0:4] == "ATOM" :
+            
+                i = ' '.join(l.split(' ')).split()
+                string = l[17:20] + "-"+l[22:26]
+                dico[string] = map(float,i[6:9])
+                
+
+            
+
+                
+        res["MODEL_"+str(modele)] = dico
+        #modele +=1
+        #dico = dict()
+
     
     return res
 
@@ -137,12 +152,12 @@ sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)
 fichier1 = lire_pdb("3pdz.pdb")
 fichier2 = lire_pdb("1fcf_aliSeq.pdb")
 
-coord1 = coordonnees(fichier1)
-coord1 = coord1["modele0"]
-at1 = atome(fichier1)
-
-coord2 = coordonnees(fichier2)
-coord2 = coord2["modele0"]
-at2 = atome(fichier2)
-RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
-       
+#coord1 = coordonnees(fichier1)
+#coord1 = coord1["modele0"]
+#at1 = atome(fichier1)
+#
+#coord2 = coordonnees(fichier2)
+#coord2 = coord2["modele0"]
+#at2 = atome(fichier2)
+#RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+#       
