@@ -5,6 +5,8 @@ Created on Tue Sep 26 10:03:31 2017
 @author: 3202002
 """
 import math
+import numpy as np
+from pylab import *
 
 def lire_pdb(nom_fichier="3pdz.pdb"):
     """
@@ -179,4 +181,19 @@ at2 = atome(fichier2)
 
 
 RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
-#       
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ù
+def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
+    
+    def calcul(P1,P2):    
+        return math.sqrt(pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2))
+    
+    trier1 = trie("CA",liste_atomes_1,sel_p1)
+    trier2 = trie("CA",liste_atomes_2,sel_p2)
+    res = np.zeros((len(trier1),len(trier2)))
+    for i in range (len(res)):
+        for j in range (len(res[i])):
+            coord1 = coord(trier1[i],coordonnees_1)
+            coord2 = coord(trier2[j],coordonnees_2)
+            res[i][j] = calcul(coord1,coord2)
+            
+    pcolor(res)
