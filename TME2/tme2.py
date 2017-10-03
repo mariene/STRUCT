@@ -67,7 +67,7 @@ def coordonnees(liste):
         #dico = dict()
         l=liste[j]
         if l[0:6]=="ENDMDL" :
-            res["modele"+str(modele)] = dico
+            res["MODEL_"+str(modele)] = dico
             modele +=1
             dico = dict()
             
@@ -92,14 +92,42 @@ def coordonnees(liste):
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 def atome(liste):
-    res = []
+    modele = 0
+    res = dict()
+    dico = dict()
+    liste_res=[]
+    
+    
     for l in liste :
-        dico = dict()
+       
+             
+        
+        if l[0:6]=="ENDMDL" :
+            res["MODEL_"+str(modele)] = liste_res
+            modele +=1
+            dico = dict()
+            liste_res=[]
+            
+            
         if l[0:4] == "ATOM" :
+            dico={}
             dico["nomAtome"] =  l[12:16].replace(" ","") 
             dico["nomResidus"] = l[17:20]
             dico["numeroResidus"] = int(l[22:26])
-            res.append(dico)
+            liste_res.append(dico)
+        
+                
+
+            
+
+                
+        res["MODEL_"+str(modele)] = liste_res
+        
+
+
+    
+           
+            
     return res
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -117,9 +145,18 @@ def main(nom_fichier = "1cll.pdb") :
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+def coord(dico,liste_coord):
+    liste_residus = liste_coord.keys()
+    for i in liste_residus : 
+        tmp = i.split("-")
+        #print tmp
+        if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
+            print i, liste_coord[i]
+            return liste_coord[i]
 
-    
-    
+
+
+
 def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
     
     def calcul(P1,P2):
@@ -132,29 +169,27 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
                 res.append(i)
         return res
     
-    def dico_correp(numero,liste_dico):
-        for i in liste_dico : 
-            if eval(i['numeroResidus']) == numero : 
-                return i
+#    def dico_correp(numero,liste_dico):
+#        for i in liste_dico : 
+#            if eval(i['numeroResidus']) == numero : 
+#                return i
                 
     def coord(dico,liste_coord):
         liste_residus = liste_coord.keys()
         for i in liste_residus : 
             tmp = i.split("-")
-            if tmp[0] == dico['nomResidus'] and tmp[1] == dico['numeroResidus']:
+            #print tmp
+            if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
                 print i, liste_coord[i]
-                return liste_coord[i]
+            return liste_coord[i]
                 
     somme = 0
     trier1 = trie("CA",liste_atomes_1,sel_p1)
     trier2 = trie("CA",liste_atomes_2,sel_p2)
 
     
-    print (len(trier1))
-    print (len(trier2))
-    
     if len(trier1) == len(trier2):
-        print ('Cool')
+        
         for i in range (len(trier1)):
             coord1 = coord(trier1[i],coordonnees_1)
             coord2 = coord(trier2[i],coordonnees_2)
@@ -162,6 +197,8 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
             somme = somme + calcul(coord1,coord2)
             #print calcul(coord1,coord2)
     print math.sqrt(somme/len(trier1))
+    
+    return trier1, trier2
             
             
         
@@ -174,10 +211,15 @@ fichier2 = lire_pdb("1fcf_aliSeq.pdb")
 coord1 = coordonnees(fichier1)
 coord1 = coord1["MODEL_0"]
 at1 = atome(fichier1)
+at1=at1["MODEL_0"]
+
+
 
 coord2 = coordonnees(fichier2)
 coord2 = coord2["MODEL_0"]
 at2 = atome(fichier2)
+at2=at2["MODEL_0"]
+
 
 
 RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
@@ -197,3 +239,7 @@ def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,
             res[i][j] = calcul(coord1,coord2)
             
     pcolor(res)
+
+t1,t2 = RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+#       
+
