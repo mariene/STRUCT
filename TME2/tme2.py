@@ -145,18 +145,6 @@ def main(nom_fichier = "1cll.pdb") :
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-def coord(dico,liste_coord):
-    liste_residus = liste_coord.keys()
-    for i in liste_residus : 
-        tmp = i.split("-")
-        #print tmp
-        if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
-            print i, liste_coord[i]
-            return liste_coord[i]
-
-
-
-
 def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
     
     def calcul(P1,P2):
@@ -180,10 +168,11 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
             tmp = i.split("-")
             #print tmp
             if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
-                print i, liste_coord[i]
-            return liste_coord[i]
+                print dico['nomResidus']
+                #print i, liste_coord[i]
+                return liste_coord[i]
                 
-    somme = 0
+    somme = 0.0
     trier1 = trie("CA",liste_atomes_1,sel_p1)
     trier2 = trie("CA",liste_atomes_2,sel_p2)
 
@@ -191,16 +180,23 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
     if len(trier1) == len(trier2):
         
         for i in range (len(trier1)):
+            
             coord1 = coord(trier1[i],coordonnees_1)
             coord2 = coord(trier2[i],coordonnees_2)
-
+            print coord1,coord2
+            #somme = somme + math.sqrt(calcul(coord1,coord2))
             somme = somme + calcul(coord1,coord2)
+            #print i, somme
             #print calcul(coord1,coord2)
+            
     print math.sqrt(somme/len(trier1))
-    
-    return trier1, trier2
-            
-            
+    #print somme  
+    return math.sqrt(somme/len(trier1))
+      
+
+      
+sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
+sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
         
 sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
 sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
@@ -221,8 +217,25 @@ at2 = atome(fichier2)
 at2=at2["MODEL_0"]
 
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+s=RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+
+# Trouver la plus petite distance
+
+
+#for t in range(30):
+#    coord1 = coordonnees(fichier1)
+#    coord1 = coord1["MODEL_"+str(t)]
+#    at1 = atome(fichier1)
+#    at1=at1["MODEL_"+str(t)]
+#    Score = RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+#
+#    if Score < s:
+#        s=Score
+#        i=t
+
+
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ù
 def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
     
@@ -240,6 +253,4 @@ def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,
             
     pcolor(res)
 
-t1,t2 = RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
-#       
 
