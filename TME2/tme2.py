@@ -93,10 +93,10 @@ def atome(liste):
     res = []
     for l in liste :
         dico = dict()
-        if l[0] == "ATOM" :
-            dico["nomAtome"] = l[2]
-            dico["nomResidus"] = l[3]
-            dico["numeroResidus"] = l[5]
+        if l[0:4] == "ATOM" :
+            dico["nomAtome"] =  l[12:16].replace(" ","") 
+            dico["nomResidus"] = l[17:20]
+            dico["numeroResidus"] = int(l[22:26])
             res.append(dico)
     return res
     
@@ -113,6 +113,11 @@ def main(nom_fichier = "1cll.pdb") :
 #main()
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+    
+    
 def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
     
     def calcul(P1,P2):
@@ -121,7 +126,7 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
     def trie(atome, liste,sel):
         res = list()
         for i in liste : 
-            if (i["nomAtome"] == atome) and (eval(i["numeroResidus"]) in sel) and (i not in res) : 
+            if (i["nomAtome"] == atome) and (i["numeroResidus"] in sel): # and (i not in res) : 
                 res.append(i)
         return res
         
@@ -136,7 +141,11 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
     trier1 = trie("CA",liste_atomes_1,sel_p1)
     trier2 = trie("CA",liste_atomes_2,sel_p2)
     
+    print (len(trier1))
+    print (len(trier2))
+    
     if len(trier1) == len(trier2):
+        print ('Cool')
         for i in range (len(trier1)):
             coord1 = coord(trier1[i],coordonnees_1)
             coord2 = coord(trier2[i],coordonnees_2)
@@ -152,12 +161,14 @@ sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)
 fichier1 = lire_pdb("3pdz.pdb")
 fichier2 = lire_pdb("1fcf_aliSeq.pdb")
 
-#coord1 = coordonnees(fichier1)
-#coord1 = coord1["modele0"]
-#at1 = atome(fichier1)
-#
-#coord2 = coordonnees(fichier2)
-#coord2 = coord2["modele0"]
-#at2 = atome(fichier2)
-#RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+coord1 = coordonnees(fichier1)
+coord1 = coord1["MODEL_0"]
+at1 = atome(fichier1)
+
+coord2 = coordonnees(fichier2)
+coord2 = coord2["MODEL_0"]
+at2 = atome(fichier2)
+
+
+RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
 #       
