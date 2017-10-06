@@ -62,25 +62,38 @@ def coordonnees(liste):
     modele = 0
     res = dict()
     dico = dict()
+    dico2={}
+    string=''
     for j in range(len(liste)):
-        
-        #dico = dict()
         l=liste[j]
+        
+        
         if l[0:6]=="ENDMDL" :
             res["MODEL_"+str(modele)] = dico
             modele +=1
             dico = dict()
-            
-            
+            dico2={}
+        
+        
         if l[0:4] == "ATOM" :
-            
-                i = ' '.join(l.split(' ')).split()
-                string = l[17:20] + "-"+l[22:26]
-                dico[string] = map(float,i[6:9])
                 
-
-            
-
+                i = ' '.join(l.split(' ')).split()
+                
+                if l[17:20] + "-"+l[22:26] == string :
+                    dico2[i[2]]= map(float,i[6:9])
+                    
+                    
+                if l[17:20] + "-"+l[22:26] != string :
+                    
+                    dico[string]=dico2
+                    
+                    string = l[17:20] + "-"+l[22:26]
+                    dico2={}
+                    dico2[i[2]]= map(float,i[6:9])
+                   
+                #dico2 # enlever les espace dans la clé
+                
+    
                 
         res["MODEL_"+str(modele)] = dico
         #modele +=1
@@ -88,6 +101,13 @@ def coordonnees(liste):
 
     
     return res
+
+t1=coordonnees(fichier1)
+
+#In [34]: t1['MODEL_0']['SER-  21']['CA']
+#Out[34]: [4.784, 4.378, 7.342
+
+
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -143,7 +163,28 @@ def main(nom_fichier = "1cll.pdb") :
 #main()
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def trie(atome, liste,sel):
+        res = list()
+        for i in liste : 
+            if (i["nomAtome"] == atome) and (i["numeroResidus"] in sel): # and (i not in res) : 
+                res.append(i)
+        return res
+        
+trier1 = trie("CA",at1,sel3PDZ)
+      
 
+def coord(dico,liste_coord):
+    liste_residus = liste_coord.keys()
+    for i in liste_residus : 
+        tmp = i.split("-")
+        #print tmp
+        if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
+            print dico['nomResidus']
+            #print i, liste_coord[i]
+            return liste_coord[i]
+
+
+coord1 = coord(trier1[0],coord1)
 
 def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
     
