@@ -242,28 +242,6 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
     #print math.sqrt(somme/len(trier1))
     #print somme  
     return math.sqrt(somme/len(trier1))
-      
-t1=coordonnees(fichier1)        
-trier1 = trie("CA",at1,sel3PDZ)
-coord1 = coord(trier1[0],coord1)
-      
-sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
-sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
-
-fichier1 = lire_pdb("3pdz.pdb")
-fichier2 = lire_pdb("1fcf_aliSeq.pdb")
-
-coord1 = coordonnees(fichier1)
-coord1 = coord1["MODEL_0"]
-at1 = atome(fichier1)
-at1=at1["MODEL_0"]
-
-
-
-coord2 = coordonnees(fichier2)
-coord2 = coord2["MODEL_0"]
-at2 = atome(fichier2)
-at2=at2["MODEL_0"]
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -307,7 +285,43 @@ def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,
     #print res.shape     
     pylab.pcolor(res)
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+def CV(rayon,residus):
+    
+    for atome in residus : 
+        #ray = calcule a faire
+        #if rayon
+        pass
+        
+        
+
+    
+sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
+sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
+
+fichier1 = lire_pdb("3pdz.pdb")
+fichier2 = lire_pdb("1fcf_aliSeq.pdb")
+
+coord1 = coordonnees(fichier1)
+coord1 = coord1["MODEL_0"]
+at1 = atome(fichier1)
+at1=at1["MODEL_0"]
+
+
+
+coord2 = coordonnees(fichier2)
+coord2 = coord2["MODEL_0"]
+at2 = atome(fichier2)
+at2=at2["MODEL_0"]
+
 distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+
+
+
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
