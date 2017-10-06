@@ -6,7 +6,7 @@ Created on Tue Sep 26 10:03:31 2017
 """
 import math
 import numpy as np
-from pylab import *
+import pylab
 
 def lire_pdb(nom_fichier="3pdz.pdb"):
     """
@@ -27,6 +27,7 @@ def lire_pdb(nom_fichier="3pdz.pdb"):
 def details(liste):
     """
     @param liste
+    @return dico
     """
     dico = dict()
     
@@ -39,16 +40,16 @@ def details(liste):
             dico["methode"] = l[10:80]
         if l[0:6] == "REMARK" : 
             if "RESOLUTION." in l :
-                #if ' '.join(l[l.index("RESOLUTION.")+1:len(l)]) == 'NOT APPLICABLE.':
                 if 'NOT APPLICABLE' in l:
                     dico["resolution"] = None
                 else :
-                    dico["resolution"] = float(l[l.index("RESOLUTION.")+1])
+                    pass
+                    dico["resolution"] = l[26:40]
     return dico
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-def lecture_pdb_bis(liste):
+def lecture_dbref(liste):
     dico = dict()
     for l in liste:
         if l[0:5] == "DBREF":
@@ -102,7 +103,7 @@ def coordonnees(liste):
     
     return res
 
-#t1=coordonnees(fichier1)
+
 
 #In [34]: t1['MODEL_0']['SER-  21']['CA']
 #Out[34]: [4.784, 4.378, 7.342
@@ -163,32 +164,47 @@ def main(nom_fichier = "1cll.pdb") :
 #main()
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#def trie(atome, liste,sel):
-#        res = list()
-#        for i in liste : 
-#            if (i["nomAtome"] == atome) and (i["numeroResidus"] in sel): # and (i not in res) : 
-#                res.append(i)
-#        return res
-#        
-#trier1 = trie("CA",at1,sel3PDZ)
-#      
-#
-#def coord(dico,liste_coord):
-#    liste_residus = liste_coord.keys()
-#    for i in liste_residus : 
-#        tmp = i.split("-")
-#        #print tmp
-#        if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
-#            print dico['nomResidus']
-#            #print i, liste_coord[i]
-#            n=dico['nomAtome']
-#            return liste_coord[i][n]
-#
-#
-#c1 = coord(trier1[0],coord1)
+def trie(atome, liste,sel):
+    """Permet de recuperer les residus qui nous interessent
+    
+    @param atome : str, nom de l'atome
+    @param liste : list, liste de dictionnaire 
+    @param sel : list, liste des positions 
+    
+    @return res : list, liste des residus 
+    Comments
+    --------
+    Fonction OK
+    """
+    res = list()
+    for i in liste : 
+        if (i["nomAtome"] == atome) and (i["numeroResidus"] in sel): # and (i not in res) : 
+            res.append(i)
+    return res
+
+      
+def coord(dico,liste_coord):
+    liste_residus = liste_coord.keys()
+    for i in liste_residus : 
+        tmp = i.split("-")
+        #print tmp
+        if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
+            #print dico['nomResidus']
+            #print i, liste_coord[i]
+            n=dico['nomAtome']
+            return liste_coord[i][n]
+
+
 
 def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
+    """
     
+    Test
+    ----
+    >>> round(RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF),2)
+    9.17
+    
+    """
     def calcul(P1,P2):
         return pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2)
     
@@ -204,16 +220,7 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
 #            if eval(i['numeroResidus']) == numero : 
 #                return i
                     
-    def coord(dico,liste_coord):
-        liste_residus = liste_coord.keys()
-        for i in liste_residus : 
-            tmp = i.split("-")
-            #print tmp
-            if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
-                print dico['nomResidus']
-                #print i, liste_coord[i]
-                n=dico['nomAtome']
-                return liste_coord[i][n]
+
                 
     somme = 0.0
     trier1 = trie("CA",liste_atomes_1,sel_p1)
@@ -226,21 +233,20 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
             
             coord1 = coord(trier1[i],coordonnees_1)
             coord2 = coord(trier2[i],coordonnees_2)
-            print coord1,coord2
+            #print coord1,coord2
             #somme = somme + math.sqrt(calcul(coord1,coord2))
             somme = somme + calcul(coord1,coord2)
             #print i, somme
             #print calcul(coord1,coord2)
             
-    print math.sqrt(somme/len(trier1))
+    #print math.sqrt(somme/len(trier1))
     #print somme  
     return math.sqrt(somme/len(trier1))
       
-
+t1=coordonnees(fichier1)        
+trier1 = trie("CA",at1,sel3PDZ)
+coord1 = coord(trier1[0],coord1)
       
-sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
-sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
-        
 sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
 sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
 
@@ -262,7 +268,7 @@ at2=at2["MODEL_0"]
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-s=RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
 
 # Trouver la plus petite distance
 
@@ -279,7 +285,7 @@ s=RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
 #        i=t
 
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ù
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
     
     def calcul(P1,P2):    
@@ -287,13 +293,21 @@ def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,
     
     trier1 = trie("CA",liste_atomes_1,sel_p1)
     trier2 = trie("CA",liste_atomes_2,sel_p2)
+    
     res = np.zeros((len(trier1),len(trier2)))
     for i in range (len(res)):
         for j in range (len(res[i])):
-            coord1 = coord(trier1[i],coordonnees_1)
-            coord2 = coord(trier2[j],coordonnees_2)
-            res[i][j] = calcul(coord1,coord2)
-            
-    pcolor(res)
+            if i == j : 
+                res[i][j] = 0.0
+            else :
+                coord1 = coord(trier1[i],coordonnees_1)
+                coord2 = coord(trier2[j],coordonnees_2)
+                res[i][j] = calcul(coord1,coord2)
+    
+    #print res.shape     
+    pylab.pcolor(res)
 
-
+distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
