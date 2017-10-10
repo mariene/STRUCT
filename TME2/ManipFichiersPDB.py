@@ -231,6 +231,7 @@ def CarteContacts (P1, P2, sel_P1, sel_P2, modeleNum, modeleNum2, nomChaine, nom
     assert len(sel_P1) == len(sel_P2), "Nombre de residus incorrect"
     
     CarteContact = np.zeros((len(sel_P1), len(sel_P1)))
+    #print CarteContact.shape
     
     # Selection des bonnes coordonnees
     P1_1chaine = P1[nomChaine][modeleNum]

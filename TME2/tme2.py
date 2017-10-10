@@ -9,10 +9,15 @@ import numpy as np
 import pylab
 
 def lire_pdb(nom_fichier="3pdz.pdb"):
-    """
-    @param nom_fichier : str, nom du fichier ou chemin
-    @return liste : list, liste compose de liste contenant chaque mot de chaque 
-    ligne 
+    """ Permet de lire un fichier pdb et de stocker les donnees 
+    
+    Parameters
+    ----------
+    nom_fichier : str, nom du fichier ou chemin
+
+    Returns
+    -------
+    liste : list, liste compose de liste contenant chaque mot de chaque ligne 
     """
     fichier = open(nom_fichier, "r")
     liste = []
@@ -26,8 +31,15 @@ def lire_pdb(nom_fichier="3pdz.pdb"):
 
 def details(liste):
     """
-    @param liste
-    @return dico
+    
+    Parameters
+    ----------
+    liste : list,
+
+    Returns
+    -------
+    dico :  dict, 
+    
     """
     dico = dict()
     
@@ -68,16 +80,13 @@ def coordonnees(liste):
     for j in range(len(liste)):
         l=liste[j]
         
-        
         if l[0:6]=="ENDMDL" :
             res["MODEL_"+str(modele)] = dico
             modele +=1
             dico = dict()
             dico2={}
         
-        
         if l[0:4] == "ATOM" :
-                
                 i = ' '.join(l.split(' ')).split()
                 
                 if l[17:20] + "-"+l[22:26] == string :
@@ -91,22 +100,10 @@ def coordonnees(liste):
                     string = l[17:20] + "-"+l[22:26]
                     dico2={}
                     dico2[i[2]]= map(float,i[6:9])
-                   
-                #dico2 # enlever les espace dans la clé
-                
-    
-                
+   
         res["MODEL_"+str(modele)] = dico
-        #modele +=1
-        #dico = dict()
 
-    
     return res
-
-
-
-#In [34]: t1['MODEL_0']['SER-  21']['CA']
-#Out[34]: [4.784, 4.378, 7.342
 
 
 
@@ -117,12 +114,9 @@ def atome(liste):
     res = dict()
     dico = dict()
     liste_res=[]
-    
-    
+
     for l in liste :
-       
-             
-        
+
         if l[0:6]=="ENDMDL" :
             res["MODEL_"+str(modele)] = liste_res
             modele +=1
@@ -136,19 +130,9 @@ def atome(liste):
             dico["nomResidus"] = l[17:20]
             dico["numeroResidus"] = int(l[22:26])
             liste_res.append(dico)
-        
-                
-
-            
-
-                
+  
         res["MODEL_"+str(modele)] = liste_res
-        
-
-
-    
-           
-            
+       
     return res
     
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -167,11 +151,16 @@ def main(nom_fichier = "1cll.pdb") :
 def trie(atome, liste,sel):
     """Permet de recuperer les residus qui nous interessent
     
-    @param atome : str, nom de l'atome
-    @param liste : list, liste de dictionnaire 
-    @param sel : list, liste des positions 
+    Parameters
+    ----------
+    atome : str, nom de l'atome
+    liste : list, liste de dictionnaire 
+    sel : list, liste des positions 
     
-    @return res : list, liste des residus 
+    Returns
+    -------
+    res : list, liste des residus 
+    
     Comments
     --------
     Fonction OK
@@ -196,11 +185,26 @@ def coord(dico,liste_coord):
 
 
 
-def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
+def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2, atome = "CA"):
     """
     
     Test
     ----
+    >>> sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
+    >>> sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
+    
+    >>> fichier1 = lire_pdb("3pdz.pdb")
+    >>> fichier2 = lire_pdb("1fcf_aliSeq.pdb")
+    
+    >>> coord1 = coordonnees(fichier1)
+    >>> coord1 = coord1["MODEL_0"]
+    >>> at1 = atome(fichier1)
+    >>> at1=at1["MODEL_0"]
+
+    >>> coord2 = coordonnees(fichier2)
+    >>> coord2 = coord2["MODEL_0"]
+    >>> at2 = atome(fichier2)
+    >>> at2=at2["MODEL_0"]
     >>> round(RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF),2)
     9.17
     
@@ -214,17 +218,10 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
             if (i["nomAtome"] == atome) and (i["numeroResidus"] in sel): # and (i not in res) : 
                 res.append(i)
         return res
-    
-#    def dico_correp(numero,liste_dico):
-#        for i in liste_dico : 
-#            if eval(i['numeroResidus']) == numero : 
-#                return i
-                    
-
-                
+                 
     somme = 0.0
-    trier1 = trie("CA",liste_atomes_1,sel_p1)
-    trier2 = trie("CA",liste_atomes_2,sel_p2)
+    trier1 = trie(atome,liste_atomes_1,sel_p1)
+    trier2 = trie(atome,liste_atomes_2,sel_p2)
 
     
     if len(trier1) == len(trier2):
@@ -246,7 +243,7 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+#RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
 
 # Trouver la plus petite distance
 
@@ -264,13 +261,29 @@ RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2):
+def calcul_distance(P1,P2):    
+    """Permet de connaitre la distance entre deux points
     
-    def calcul(P1,P2):    
-        return math.sqrt(pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2))
+    Parameters
+    ----------
+    P1 : list, coordonnees d'un point
+    P2 : list, coordonnees d'un point
     
-    trier1 = trie("CA",liste_atomes_1,sel_p1)
-    trier2 = trie("CA",liste_atomes_2,sel_p2)
+    Returns
+    -------    
+    float, distance entre 2 points
+    
+    """
+    return math.sqrt(pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2))
+
+def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2,atome = "CA"):
+    """
+    A refaire ! 
+    
+    """
+    
+    trier1 = trie(atome,liste_atomes_1,sel_p1)
+    trier2 = trie(atome,liste_atomes_2,sel_p2)
     
     res = np.zeros((len(trier1),len(trier2)))
     for i in range (len(res)):
@@ -280,23 +293,155 @@ def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,
             else :
                 coord1 = coord(trier1[i],coordonnees_1)
                 coord2 = coord(trier2[j],coordonnees_2)
-                res[i][j] = calcul(coord1,coord2)
+                res[i][j] = calcul_distance(coord1,coord2)
     
     #print res.shape     
     pylab.pcolor(res)
+    
+    return res
+
+def dissimilarite():
+    """
+    Difference entre 2 cartes de contacts
+    """
+    pass
+
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-def CV(rayon,residus):
+def norme(P):
+    """Permet de calculer la norme
     
-    for atome in residus : 
-        #ray = calcule a faire
-        #if rayon
-        pass
-        
-        
+    Parameters
+    ----------
+    P : list, coordonnees de vecteur 
+    
+    Returns
+    -------
+    float, la norme du vecteur
+    """
+    return math.sqrt(pow(P[0],2) + pow(P[1],2) + pow(P[2],2))
+    
+def vect(P1,P2):
+    """ Permet de calculer les coord d'un vecteur 
+    
+    Parameters
+    ----------
+    P1 : list, coordonnees d'un point
+    P2 : list, coordonnees d'un point
+    """
+    return [P2[0]-P1[0],P2[1]-P1[1],P2[2]-P1[2]]
+    
 
+def CV_i(rc,coord_i,coordonnees):
+    """Permet de calculer la variance ciculaire d'un atome
     
+    Parameters
+    ----------
+    coord_i : list, coordonnees d'un atome, par ex : [11.09, 1.768, 0.092]
+    coordonnees : dict, {aa : {atome : coord}}
+    rc : float, rayon rc
+    
+    Returns
+    -------
+    float, la variance circulaire 
+    """
+    #Recup tous les atomes ayant une distance inf a rc
+    res_at = []
+    
+    for liste_at in coordonnees.keys() : 
+        for atome in coordonnees[liste_at].keys():
+            c = coordonnees[liste_at][atome]
+            #print calcul_distance(c,coord_i)
+            if calcul_distance(c,coord_i) < rc and (coord_i[0]!=c[0] and coord_i[1]!=c[1] and coord_i[2]!=c[2]) : 
+                #print c
+                res_at.append(c) 
+            
+            
+    #Avec la liste d'atome recupere je calcule la variance circulaire
+    somme_x = 0.
+    somme_y = 0.
+    somme_z = 0.     
+
+    for i in res_at : 
+        #print i
+        tmp = vect(coord_i,i) #vecteur ij
+        somme_x += (tmp[0]/norme(tmp))
+        somme_y += (tmp[1]/norme(tmp))
+        somme_z += (tmp[2]/norme(tmp))
+    return 1 - (norme([somme_x,somme_y,somme_z])/len(res_at))
+        
+def CV_residus(rc,coordonnees):
+    """Permet de calculer la variance ciculaire de chaque residus
+    
+    Cela correspond a la moyenne des variances circulaires de chaque atome de 
+    chaque residus
+    
+    Parameters
+    ----------
+    coordonnees : dict, {aa : {atome : coord}}
+    rc : float, rayon rc
+    
+    Returns
+    -------
+    cv_res : dict, {residus : Cv} 
+    """
+    res = dict()
+    for i in coordonnees.keys() :
+        tmp = dict()
+        for atome in coordonnees[i].keys():
+            tmp[atome] = CV_i(rc,coordonnees[i][atome],coordonnees)
+        res[i]=tmp
+    #print res
+    
+    cv_res = dict()
+
+    for i in res.keys() :
+        somme = 0.
+        if i != '' : 
+            for atome in res[i].keys():
+                #print somme
+                somme+=res[i][atome]
+            
+            cv_res[i] = somme/len(res[i].keys())
+            #print "sortie : ", somme/len(res[i].keys())
+    #print cv_res
+    return cv_res
+        
+def pourcentage(residus):
+    """Calcule le pourcentage de residus les plus enfouis et les plus protuberant
+    
+    Parameters
+    ----------
+    residus : dict
+    
+    Returns
+    -------
+    tuple, couple contenant le pourcentage de residus les plus enfouis et 
+            les plus protuberant    
+    
+    Comments
+    --------
+    J'ai suppose le 0.5, en vrai je ne sais pas donc -> A REVOIR ! 
+    
+    """
+    enfoui = 0.0
+    protuberant = 0.0
+    for i in residus.keys() :
+        c = residus[i]
+        if c > 0.5 : 
+            protuberant +=1
+        else :
+            enfoui +=1
+    print enfoui/len(residus.keys())
+    print protuberant /len(residus.keys()) 
+    
+    return (enfoui/len(residus.keys()),protuberant /len(residus.keys()))
+        
+    
+def 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
+  
 sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
 sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
 
@@ -308,20 +453,17 @@ coord1 = coord1["MODEL_0"]
 at1 = atome(fichier1)
 at1=at1["MODEL_0"]
 
-
-
 coord2 = coordonnees(fichier2)
 coord2 = coord2["MODEL_0"]
 at2 = atome(fichier2)
 at2=at2["MODEL_0"]
 
-distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+#distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+print CV_i(20.0,[11.09, 1.768, 0.092],coord1)
 
+cv = CV_residus(20,coord1)
+pourcentage(cv)
 
-
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
