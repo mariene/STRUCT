@@ -439,7 +439,10 @@ def pourcentage(residus):
     return (enfoui/len(residus.keys()),protuberant /len(residus.keys()))
         
     
-def 
+def ecriture_pdb(valeur,liste):
+    """Permet d'ecrire un fichier pdb avec les valeurs donnees en entree
+    
+    """
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
   
 sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
