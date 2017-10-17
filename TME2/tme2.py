@@ -8,6 +8,12 @@ import math
 import numpy as np
 import pylab
 import matplotlib.pyplot as plt
+import ForceField
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#A. Lecture d’un fichier PDB
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 def lire_pdb(nom_fichier="3pdz.pdb"):
@@ -181,6 +187,9 @@ def coord(dico,liste_coord):
             n=dico['nomAtome']
             return liste_coord[i][n]
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#B. Comparaison de deux structures protéiques
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2, atome = "CA"):
@@ -315,32 +324,27 @@ def calcul_distance(P1,P2):
     """
     return math.sqrt(pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2))
 
-#def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2,atome = "CA"):
-#    """
-#    A refaire ! 
-#    
-#    """
-#    
-#    trier1 = trie(atome,liste_atomes_1,sel_p1)
-#    trier2 = trie(atome,liste_atomes_2,sel_p2)
-#    
-#    res = np.zeros((len(trier1),len(trier2)))
-#    for i in range (len(res)):
-#        for j in range (len(res[i])):
-#            if i == j : 
-#                res[i][j] = 0.0
-#            else :
-#                coord1 = coord(trier1[i],coordonnees_1)
-#                coord2 = coord(trier2[j],coordonnees_2)
-#                res[i][j] = calcul_distance(coord1,coord2)
-#    
-#    #print res.shape     
-#    pylab.pcolor(res)
-#    
-#    return res
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#  C. Cartes de contacts
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     
 def carte_contact(coordonnees):
+    """
+    retourne une matrice symétrique, 
+    des distances entre les 'CA' de tous les aa d'une meme proteine.
+    
+    Parameters
+    ----------
+    coordonnees : dictionnary, {aa : { atome : [ x, y, z ]  }} 
+    
+    Returns
+    -------
+    matrix, distance entre aa
+    
+    
+    """
     dim=(len(coordonnees.keys())+10)
     matrice=np.zeros((dim,dim))
     
@@ -389,7 +393,10 @@ def dissimilarite():
     pass
 
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#  D. Variance circulaire
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 def norme(P):
     """Permet de calculer la norme
@@ -526,6 +533,27 @@ def ecriture_pdb(valeur,liste):
     """Permet d'ecrire un fichier pdb avec les valeurs donnees en entree
     
     """
+    
+    
+    
+    
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#  E. Champ de force
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# dr : rayon
+# dE : epsilon
+# dcharge : charges
+
+
+
+
+    
+    
+    
+    
+    
+    
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
   
 sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
@@ -570,3 +598,11 @@ pourcentage(cv)
 #if __name__ == "__main__":
 #    import doctest
 #    doctest.testmod()
+
+
+
+
+
+
+
+
