@@ -545,15 +545,119 @@ def ecriture_pdb(valeur,liste):
 # dE : epsilon
 # dcharge : charges
 
+# dans le papier R* sert à calculer Aij et Bij : somme des R* (rayon vdw) et epsilon* (sqrt(ei + ej)) 
+
+# Rd(i)= Ri*
+# Rij* = Ri* + Rj*
+# Re (i) = epsilon
+# epsilon = sqrt( epsilon_i epsilon_j  )
+
+
+# A_ij = epsilon_ij ( Rij*)^12
+# B_ij = 2 epsilon (Rij*)^6
+
+
+charge_PDB= ForceField.chargePDB()
+dvdw, depsilon =  ForceField.epsilon_vdw_PDB() 
+
+def calcul_distance(P1,P2):    
+
+    return math.sqrt(pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2))
+
+
+#chargePDB[aa][atome]
+
+def calcul_Rij_etoile( aa1, atome1, aa2, atome2 ):
+    vdw1 = dvdw[aa1][atome1]
+    vdw2 = dvdw[aa2][atome2]
+    return vdw1 + vdw2
+
+def calcul_epsilon_ij( aa1, atome1, aa2, atome2 ):
+    e1 = depsilon[aa1][atome1]
+    e2 = depsilon[aa2][atome2]
+    return math.sqrt(e1 * e2)
+    
+    
+def calcul_A( epsilon_ij , Rij_etoile ):
+    return epsilon_ij * math.pow(Rij_etoile, 12  )
+
+  
+def calcul_B( epsilon_ij , Rij_etoile ):
+    return 2 * epsilon_ij * math.pow(Rij_etoile, 6 )
+
+    
+
+    
+
+
+def calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2)  :
+    Rij_etoile= calcul_Rij_etoile( aa1, atome1, aa2, atome2 )
+    epsilon_ij=calcul_epsilon_ij( aa1, atome1, aa2, atome2 )
+    R_ij = calcul_distance(coord1,coord2)
+    A = calcul_A( epsilon_ij , Rij_etoile )
+    B= calcul_B( epsilon_ij , Rij_etoile )
+    return (A / pow(R_ij, 12)) - (B / pow(R_ij,6))
+    
+
+aa1 = 'PRO'#'PRO-   1'
+atome1= 'CA'
+coord1 = [-22.132, 2.484, -2.791]
+
+aa2 = 'LEU'#'LEU-   4'
+atome2='CA'
+coord2=[-6.696, 22.003, 26.447]
+
+
+print calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2) 
+
+f= 332.0522
+
+
+def calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) :
+    q1 = charge_PDB[aa1][atome1]
+    q2 = charge_PDB[aa2][atome2]
+    R_ij = calcul_distance(coord1,coord2)
+    return f *  q1 * q2 / (20* R_ij) 
+    
+
+
+print calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) 
+
+    
+def calcul_energie( prot1, prot2 ):
+    energie=0.0
+    for aa_i in prot1.keys():
+        if len(aa_i.split('-'))==2:
+            aa1 = aa_i.split('-')[0]
+            #print aa_i
+            for aa_j in prot2.keys():
+                if len(aa_j.split('-'))==2:
+                    aa2 = aa_j.split('-')[0]
+                    print aa_j
+                    for atome_i in prot1[aa_i].keys():
+                        for atome_j in prot2[aa_j].keys():
+                            print atome_j
+                            coord1=prot1[aa_i][atome_i]
+                            coord2=prot2[aa_j][atome_j]
+                            VDW= calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2) 
+                            Coulomb= calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) 
+                            
+                            energie += VDW 
+                            energie += Coulomb
+    return energie
+    
+    
+    
+print calcul_energie(coord1, coord2)
 
 
 
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
   
 sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
@@ -574,26 +678,26 @@ at2 = atome(fichier2)
 at2=at2["MODEL_0"]
 
 
-    
-d1=carte_contact(coord1)
-plt.figure()
-plt.axis(  [0,len(d1) ,0,len(d1)]    )
-pylab.pcolor(d1)
-plt.colorbar()
-#plt.show()
-
-d2=carte_contact(coord2)
-plt.figure()
-plt.axis(  [0,len(d2) ,0,len(d2)]    )
-pylab.pcolor(d2)
-plt.colorbar()
-
-
-#distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
-print CV_i(20.0,[11.09, 1.768, 0.092],coord1)
-
-cv = CV_residus(20,coord1)
-pourcentage(cv)
+#    
+#d1=carte_contact(coord1)
+#plt.figure()
+#plt.axis(  [0,len(d1) ,0,len(d1)]    )
+#pylab.pcolor(d1)
+#plt.colorbar()
+##plt.show()
+#
+#d2=carte_contact(coord2)
+#plt.figure()
+#plt.axis(  [0,len(d2) ,0,len(d2)]    )
+#pylab.pcolor(d2)
+#plt.colorbar()
+#
+#
+##distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+#print CV_i(20.0,[11.09, 1.768, 0.092],coord1)
+#
+#cv = CV_residus(20,coord1)
+#pourcentage(cv)
 #
 #if __name__ == "__main__":
 #    import doctest
