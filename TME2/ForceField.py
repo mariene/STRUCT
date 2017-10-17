@@ -1195,7 +1195,7 @@ def epsilon_vdw_PDB() :
     depsilon["HIE"]["HB2"] = dE["HC"]
     depsilon["HIE"]["HB3"] = dE["HC"]
     depsilon["HIE"]["HE1"] = dE["H5"]
-    depsilon["HIE"]["HE2"] = dE["H"]
+    depsilon["HIE"]["HE2"] = dE["H"]  ###
     depsilon["HIE"]["HD2"] = dE["H4"]
 
     depsilon["HID"] = {}
@@ -1214,7 +1214,7 @@ def epsilon_vdw_PDB() :
     depsilon["HID"]["HB2"] = dE["HC"]
     depsilon["HID"]["HB3"] = dE["HC"]
     depsilon["HID"]["HE1"] = dE["H5"]
-    depsilon["HID"]["HD1"] = dE["H"]
+    depsilon["HID"]["HD1"] = dE["H"]  ###
     depsilon["HID"]["HD2"] = dE["H4"]
 
     depsilon["MET"] = {}
