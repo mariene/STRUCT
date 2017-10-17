@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
 """
 Created on Tue Oct 17 09:08:59 2017
@@ -5,6 +6,8 @@ Created on Tue Oct 17 09:08:59 2017
 @author: 3600744
 """
 
+=======
+>>>>>>> af759e2f31185cf6bd02d480e031713bb3434c51
 #!/usr/bin/env python
 
 
@@ -1195,7 +1198,8 @@ def epsilon_vdw_PDB() :
     depsilon["HIE"]["HB2"] = dE["HC"]
     depsilon["HIE"]["HB3"] = dE["HC"]
     depsilon["HIE"]["HE1"] = dE["H5"]
-    depsilon["HIE"]["HE2"] = dE["H"]  ###
+    depsilon["HIE"]["HE2"] = dE["H"]
+
     depsilon["HIE"]["HD2"] = dE["H4"]
 
     depsilon["HID"] = {}
@@ -1214,7 +1218,9 @@ def epsilon_vdw_PDB() :
     depsilon["HID"]["HB2"] = dE["HC"]
     depsilon["HID"]["HB3"] = dE["HC"]
     depsilon["HID"]["HE1"] = dE["H5"]
-    depsilon["HID"]["HD1"] = dE["H"]  ###
+
+    depsilon["HID"]["HD1"] = dE["H"]
+
     depsilon["HID"]["HD2"] = dE["H4"]
 
     depsilon["MET"] = {}
