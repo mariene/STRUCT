@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 17 09:08:59 2017
-
-@author: 3600744
-"""
-
-=======
->>>>>>> af759e2f31185cf6bd02d480e031713bb3434c51
 #!/usr/bin/env python
 
 

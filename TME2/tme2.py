@@ -110,9 +110,22 @@ def coordonnees(liste):
         
         if l[0:4] == "ATOM" :
                 i = ' '.join(l.split(' ')).split()
+                #atom=l[13:16]
+                atom=  l[13:16].split()[0]
+                #print 
+                #.split(' ')
+                
+                x= eval(l[31:38])
+                y= eval(l[39:46])
+                z= eval(l[47:54])
+#                print x
+#                print y
+#                print z
                 
                 if l[17:20] + "-"+l[22:26] == string :
-                    dico2[i[2]]= map(float,i[6:9])
+
+                    dico2[atom]= [x,y,z] #map(float,i[6:9])
+
                     
                     
                 if l[17:20] + "-"+l[22:26] != string :
@@ -553,10 +566,44 @@ def pourcentage(residus):
     return (enfoui/len(residus.keys()),protuberant /len(residus.keys()))
         
     
-def ecriture_pdb(valeur,liste):
+def cv_modele(coordonnes):
+    modeles = dict()
+    
+    for i in coordonnes.keys():
+        coord = coordonnes[i]
+        cv = CV_residus(20,coord)
+        modeles[i] = cv
+    
+    return modeles
+
+    
+def ecriture_pdb(valeur,liste,nom_fichier = "nouveau_fichier.pdb"):
     """Permet d'ecrire un fichier pdb avec les valeurs donnees en entree
     
+    Comments
+    --------
+    Le faire pour chaque modele
     """
+    fichier = open(nom_fichier, "w")
+    
+    for i in liste :
+        if i[0:4] == 'ATOM':
+            #nomResidus = i[17:20]
+            #numeroResidus = int(i[22:26])
+            nom  = i[17:20] + "-"+i[22:26] 
+            #print nomResidus, numeroResidus
+            if nom in valeur.keys():
+                tmp = list(i)
+                val = list(str(valeur[nom]))
+                j=0
+                for i in range (61,66):
+                    tmp[i]=val[j]
+                    j+=1
+                #print tmp
+                i = ''.join(tmp)
+                #print tmp
+            
+        fichier.write(i) 
     
     
     
@@ -634,13 +681,14 @@ def calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2)  :
 #
 #print calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2) 
 
-f= 332.0522
+
 
 
 def calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) :
     q1 = charge_PDB[aa1][atome1]
     q2 = charge_PDB[aa2][atome2]
     R_ij = calcul_distance(coord1,coord2)
+    f= 332.0522
     return f *  q1 * q2 / (20* R_ij) 
     
 
@@ -677,11 +725,13 @@ def calcul_energie( prot1, prot2 ):
                     for atome_i in prot1[aa_i].keys():
                         
                         for atome_j in prot2[aa_j].keys():
-                            #print atome_j
+                            print('aa ' + aa_j)
+
+                            print('atome ' + atome_j)
                             coord1=prot1[aa_i][atome_i]
                             coord2=prot2[aa_j][atome_j]
-                            VDW= calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2) 
-                            Coulomb= calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) 
+                            VDW= calcul_energie_vdw ( aa1, atome_i,coord1, aa2, atome_j ,coord2) 
+                            Coulomb= calcul_coulomb( aa1, atome_i,coord1, aa2, atome_j ,coord2) 
                             
                             energie += VDW 
                             energie += Coulomb
@@ -689,7 +739,6 @@ def calcul_energie( prot1, prot2 ):
     
     
     
-#print calcul_energie(coord1, coord2)
 
 
 
@@ -709,27 +758,37 @@ fichier2=lire_pdb("1cll.pdb")
 fichier3 = lire_pdb("1fcf_aliSeq.pdb")
 fichier4 = lire_pdb("2bbm.pdb")
 
-coord1 = coordonnees(fichier1)
-#coord1 = coord1["MODEL_0"]
+all_coord = coordonnees(fichier1)
+coord1 = all_coord["MODEL_0"]
 at1 = atome(fichier1)
 at1=at1["MODEL_0"]
 
 coord2 = coordonnees(fichier2)
-#coord2 = coord2["MODEL_0"]
+coord2 = coord2["MODEL_0"]
 at2 = atome(fichier2)
 at2=at2["MODEL_0"]
 
 coord4 = coordonnees(fichier4)
 #coord4 = coord4["MODEL_0"]
-at2 = atome(fichier2)
-at2=at2["MODEL_0"]
-#    
-#d1=carte_contact(coord1)
-#plt.figure()
-#plt.axis(  [0,len(d1) ,0,len(d1)]    )
-#pylab.pcolor(d1)
-#plt.colorbar()
-##plt.show()
+
+protein1=coord4['MODEL_0']
+
+protein2=coord4['MODEL_1']
+
+#print calcul_energie(coord1,coord2)
+
+
+
+
+
+
+
+d1=carte_contact(coord1)
+plt.figure()
+plt.axis(  [0,len(d1) ,0,len(d1)]    )
+pylab.pcolor(d1)
+plt.colorbar()
+plt.show()
 #
 #d2=carte_contact(coord2)
 #plt.figure()
