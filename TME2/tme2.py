@@ -7,6 +7,8 @@ Created on Tue Sep 26 10:03:31 2017
 import math
 import numpy as np
 import pylab
+import matplotlib.pyplot as plt
+
 
 def lire_pdb(nom_fichier="3pdz.pdb"):
     """ Permet de lire un fichier pdb et de stocker les donnees 
@@ -34,7 +36,7 @@ def details(liste):
     
     Parameters
     ----------
-    liste : list,
+    liste : list, liste obtenue avec la fonction lire_pdb()
 
     Returns
     -------
@@ -106,7 +108,6 @@ def coordonnees(liste):
     return res
 
 
-
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 def atome(liste):
@@ -161,9 +162,6 @@ def trie(atome, liste,sel):
     -------
     res : list, liste des residus 
     
-    Comments
-    --------
-    Fonction OK
     """
     res = list()
     for i in liste : 
@@ -186,7 +184,33 @@ def coord(dico,liste_coord):
 
 
 def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2, atome = "CA"):
-    """
+    """Permet de calculer le RMSD
+    
+    Parameters
+    ----------
+    coordonnees_1 : dict, dictionnaire contenant les coordonnees des atomes de 
+                    chaque residus pour une premiere proteine donnee. Ce dico 
+                    est obtenu avec la fonction coordonnees() qui retourne le 
+                    dico suivant {aa : {atome : coord}}
+    liste_atomes_1 : list, liste de dictionnaire où chaque dictionnaire correspond 
+                    à : {nomAtome : str,  nomResidus : str, numeroResidus : int}
+                    pour la premieme proteine
+    coordonnees_2 : dict, dictionnaire contenant les coordonnees des atomes de 
+                    chaque residus pour une deuxieme proteine donnee. Ce dico 
+                    est obtenu avec la fonction coordonnees() qui retourne le 
+                    dico suivant {aa : {atome : coord}}
+    liste_atomes_2 : list, liste de dictionnaire où chaque dictionnaire correspond 
+                    à : {nomAtome : str,  nomResidus : str, numeroResidus : int}
+                    pour la deuxieme proteine
+    sel_p1 : list, liste des positions qui nous interesse dans la sequence 1
+    sel_p2 : list, liste des positions qui nous interesse dans la sequence 2
+    atome : str, nom de l'atome (par defaut ca sera CA)
+    
+    
+    Return
+    ------
+        float, le RMSD 
+    
     
     Test
     ----
@@ -210,9 +234,24 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
     
     """
     def calcul(P1,P2):
+        """Fonction intermediaire de calcul
+        
+        Parameters
+        ----------
+        P1 : list, coordonnees d'un point
+        P2 : list, coordonnees d'un point
+        
+        Returns
+        -------
+            float
+        """
+        
         return pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2)
     
     def trie(atome, liste,sel):
+        """Recupere les elements qui nous interessent
+        
+        """
         res = list()
         for i in liste : 
             if (i["nomAtome"] == atome) and (i["numeroResidus"] in sel): # and (i not in res) : 
@@ -276,29 +315,72 @@ def calcul_distance(P1,P2):
     """
     return math.sqrt(pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2))
 
-def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2,atome = "CA"):
-    """
-    A refaire ! 
+#def distance(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_p2,atome = "CA"):
+#    """
+#    A refaire ! 
+#    
+#    """
+#    
+#    trier1 = trie(atome,liste_atomes_1,sel_p1)
+#    trier2 = trie(atome,liste_atomes_2,sel_p2)
+#    
+#    res = np.zeros((len(trier1),len(trier2)))
+#    for i in range (len(res)):
+#        for j in range (len(res[i])):
+#            if i == j : 
+#                res[i][j] = 0.0
+#            else :
+#                coord1 = coord(trier1[i],coordonnees_1)
+#                coord2 = coord(trier2[j],coordonnees_2)
+#                res[i][j] = calcul_distance(coord1,coord2)
+#    
+#    #print res.shape     
+#    pylab.pcolor(res)
+#    
+#    return res
+
     
-    """
+def carte_contact(coordonnees):
+    dim=(len(coordonnees.keys())+10)
+    matrice=np.zeros((dim,dim))
     
-    trier1 = trie(atome,liste_atomes_1,sel_p1)
-    trier2 = trie(atome,liste_atomes_2,sel_p2)
+    liste_aa_ord= [0] *(len(coordonnees.keys())+10) 
+
+
+    for aa1 in coordonnees.keys() :
+        a = aa1.split()
+        if len(a)==2 :
+            #print(type(int(a[1])))
+
+            liste_aa_ord[int(a[1])]= aa1
     
-    res = np.zeros((len(trier1),len(trier2)))
-    for i in range (len(res)):
-        for j in range (len(res[i])):
-            if i == j : 
-                res[i][j] = 0.0
-            else :
-                coord1 = coord(trier1[i],coordonnees_1)
-                coord2 = coord(trier2[j],coordonnees_2)
-                res[i][j] = calcul_distance(coord1,coord2)
+    for i in range(1, len(liste_aa_ord)):
+        for j in range(1, len(liste_aa_ord)):
+            aa1=liste_aa_ord[i]
+            aa2=liste_aa_ord[j]
+            if aa1 != 0 :
+                if aa2 != 0:
+                    p1 = coordonnees[aa1]['CA']
+                    p2 = coordonnees[aa2]['CA']
+                    
+                    matrice[i,j]=calcul_distance(p1,p2)
+                                  
+                                  
+                                  
+    # on enlève les colonnes et les lignes vides
+    liste_vide=[]
+                  
+    for i in range(0,dim)  :
+        if all(matrice[:,i]== [0] * dim ):
+            liste_vide.append(i)
+        
+        
+    m= np.delete(matrice, liste_vide, axis=0)
+    m= np.delete(m, liste_vide, axis=1)
     
-    #print res.shape     
-    pylab.pcolor(res)
     
-    return res
+    return m
+
 
 def dissimilarite():
     """
@@ -371,6 +453,7 @@ def CV_i(rc,coord_i,coordonnees):
         somme_z += (tmp[2]/norme(tmp))
     return 1 - (norme([somme_x,somme_y,somme_z])/len(res_at))
         
+
 def CV_residus(rc,coordonnees):
     """Permet de calculer la variance ciculaire de chaque residus
     
@@ -449,7 +532,8 @@ sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
 sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
 
 fichier1 = lire_pdb("3pdz.pdb")
-fichier2 = lire_pdb("1fcf_aliSeq.pdb")
+fichier2=lire_pdb("1cll.pdb")
+fichier3 = lire_pdb("1fcf_aliSeq.pdb")
 
 coord1 = coordonnees(fichier1)
 coord1 = coord1["MODEL_0"]
@@ -461,12 +545,28 @@ coord2 = coord2["MODEL_0"]
 at2 = atome(fichier2)
 at2=at2["MODEL_0"]
 
+
+    
+d1=carte_contact(coord1)
+plt.figure()
+plt.axis(  [0,len(d1) ,0,len(d1)]    )
+pylab.pcolor(d1)
+plt.colorbar()
+#plt.show()
+
+d2=carte_contact(coord2)
+plt.figure()
+plt.axis(  [0,len(d2) ,0,len(d2)]    )
+pylab.pcolor(d2)
+plt.colorbar()
+
+
 #distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
 print CV_i(20.0,[11.09, 1.768, 0.092],coord1)
 
 cv = CV_residus(20,coord1)
 pourcentage(cv)
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+#
+#if __name__ == "__main__":
+#    import doctest
+#    doctest.testmod()
