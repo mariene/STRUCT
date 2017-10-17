@@ -80,6 +80,12 @@ def lecture_dbref(liste):
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 def coordonnees(liste):
+    """ 
+    
+    Construction d'un dictionnaire comportant toutes les informations
+
+    """
+    
     modele = 0
     res = dict()
     dico = dict()
@@ -88,7 +94,15 @@ def coordonnees(liste):
     for j in range(len(liste)):
         l=liste[j]
         
-        if l[0:6]=="ENDMDL" :
+#        if l[0:6]=="ENDMDL" : #or l[0:3]=='TER' :
+#            res["MODEL_"+str(modele)] = dico
+#            modele +=1
+#            dico = dict()
+#            dico2={}
+        
+     #   if l[0:3]=="TER" :
+        if l[0:3]=='TER' :
+            dico[string]=dico2
             res["MODEL_"+str(modele)] = dico
             modele +=1
             dico = dict()
@@ -110,7 +124,17 @@ def coordonnees(liste):
                     dico2[i[2]]= map(float,i[6:9])
    
         res["MODEL_"+str(modele)] = dico
+        
+    # On suppprime les dico vides
+    
+    for cle in res.keys():
+        for cle2 in res[cle].keys():
+            if res[cle][cle2]=={}:
+                del(res[cle][cle2])
+        if res[cle]=={}:
+            del(res[cle])
 
+        
     return res
 
 
@@ -599,16 +623,16 @@ def calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2)  :
     return (A / pow(R_ij, 12)) - (B / pow(R_ij,6))
     
 
-aa1 = 'PRO'#'PRO-   1'
-atome1= 'CA'
-coord1 = [-22.132, 2.484, -2.791]
-
-aa2 = 'LEU'#'LEU-   4'
-atome2='CA'
-coord2=[-6.696, 22.003, 26.447]
-
-
-print calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2) 
+#aa1 = 'PRO'#'PRO-   1'
+#atome1= 'CA'
+#coord1 = [-22.132, 2.484, -2.791]
+#
+#aa2 = 'LEU'#'LEU-   4'
+#atome2='CA'
+#coord2=[-6.696, 22.003, 26.447]
+#
+#
+#print calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2) 
 
 f= 332.0522
 
@@ -621,7 +645,7 @@ def calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) :
     
 
 
-print calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) 
+#print calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) 
 
     
 def calcul_energie( prot1, prot2 ):
@@ -629,14 +653,31 @@ def calcul_energie( prot1, prot2 ):
     for aa_i in prot1.keys():
         if len(aa_i.split('-'))==2:
             aa1 = aa_i.split('-')[0]
+            
+            if aa1 =='HIS':
+                if 'HD1' in prot1[aa_i].keys():
+                    aa1 ='HID'
+                else :
+                    aa1 ='HIE'
+            
             #print aa_i
             for aa_j in prot2.keys():
+                
+                    
                 if len(aa_j.split('-'))==2:
                     aa2 = aa_j.split('-')[0]
                     print aa_j
+                    
+                    if aa2 =='HIS':
+                        if 'HD1' in prot2[aa_j].keys():
+                            aa2 ='HID'
+                        else :
+                            aa2 ='HIE'
+                        
                     for atome_i in prot1[aa_i].keys():
+                        
                         for atome_j in prot2[aa_j].keys():
-                            print atome_j
+                            #print atome_j
                             coord1=prot1[aa_i][atome_i]
                             coord2=prot2[aa_j][atome_j]
                             VDW= calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2) 
@@ -648,7 +689,7 @@ def calcul_energie( prot1, prot2 ):
     
     
     
-print calcul_energie(coord1, coord2)
+#print calcul_energie(coord1, coord2)
 
 
 
@@ -666,18 +707,22 @@ sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)
 fichier1 = lire_pdb("3pdz.pdb")
 fichier2=lire_pdb("1cll.pdb")
 fichier3 = lire_pdb("1fcf_aliSeq.pdb")
+fichier4 = lire_pdb("2bbm.pdb")
 
 coord1 = coordonnees(fichier1)
-coord1 = coord1["MODEL_0"]
+#coord1 = coord1["MODEL_0"]
 at1 = atome(fichier1)
 at1=at1["MODEL_0"]
 
 coord2 = coordonnees(fichier2)
-coord2 = coord2["MODEL_0"]
+#coord2 = coord2["MODEL_0"]
 at2 = atome(fichier2)
 at2=at2["MODEL_0"]
 
-
+coord4 = coordonnees(fichier4)
+#coord4 = coord4["MODEL_0"]
+at2 = atome(fichier2)
+at2=at2["MODEL_0"]
 #    
 #d1=carte_contact(coord1)
 #plt.figure()
