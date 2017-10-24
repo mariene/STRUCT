@@ -14,8 +14,6 @@ import ForceField
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #A. Lecture d’un fichier PDB
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 def lire_pdb(nom_fichier="3pdz.pdb"):
     """ Permet de lire un fichier pdb et de stocker les donnees 
     
@@ -30,16 +28,17 @@ def lire_pdb(nom_fichier="3pdz.pdb"):
     fichier = open(nom_fichier, "r")
     liste = []
     for i in fichier:
-        #l = ' '.join(i.split(' ')).split()
         liste.append(i)
     fichier.close()
     return liste 
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def details(liste):
-    """
+    """Permet d'avoir certaine information sur la sequence
     
+    Plus exactement d'avoir le nom de la méthode experimentale, la resolution 
+    de la structure, en Angstroms, le nombre de modeles
+
     Parameters
     ----------
     liste : list, liste obtenue avec la fonction lire_pdb()
@@ -56,7 +55,6 @@ def details(liste):
         if l[0:6] == "NUMMDL":
             dico["nbmodele"] = int(l[10:14])
         if l[0:6] == "EXPDTA":
-            #dico["methode"] = ' '.join(l[1:len(l)])
             dico["methode"] = l[10:80]
         if l[0:6] == "REMARK" : 
             if "RESOLUTION." in l :
@@ -70,6 +68,17 @@ def details(liste):
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 def lecture_dbref(liste):
+    """Permet d'avoir des informations associees à la sequence
+
+    Parameters
+    ----------
+    liste : list, liste obtenue avec la fonction lire_pdb()
+
+    Returns
+    -------
+    dico :  dict, 
+    
+    """
     dico = dict()
     for l in liste:
         if l[0:5] == "DBREF":
@@ -80,10 +89,19 @@ def lecture_dbref(liste):
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 def coordonnees(liste):
-    """ 
+    """Renvoie les coordonnees 3D des atomes de chaque chaine du fichier
     
     Construction d'un dictionnaire comportant toutes les informations
+    
+    Parameters
+    ----------
+    liste : list, liste obtenue avec la fonction lire_pdb()
 
+    Returns
+    -------
+    res :  dict, 
+        {modele : {aa : {atome : liste de coord}}}
+    
     """
     
     modele = 0
@@ -93,14 +111,7 @@ def coordonnees(liste):
     string=''
     for j in range(len(liste)):
         l=liste[j]
-        
-#        if l[0:6]=="ENDMDL" : #or l[0:3]=='TER' :
-#            res["MODEL_"+str(modele)] = dico
-#            modele +=1
-#            dico = dict()
-#            dico2={}
-        
-     #   if l[0:3]=="TER" :
+
         if l[0:3]=='TER' :
             dico[string]=dico2
             res["MODEL_"+str(modele)] = dico
@@ -117,16 +128,10 @@ def coordonnees(liste):
                 x= eval(l[31:38])
                 y= eval(l[39:46])
                 z= eval(l[47:54])
-#                print x
-#                print y
-#                print z
-                
-                if l[17:20] + "-"+l[22:26] == string :
 
+                if l[17:20] + "-"+l[22:26] == string :
                     dico2[atom]= [x,y,z] #map(float,i[6:9])
 
-                    
-                    
                 if l[17:20] + "-"+l[22:26] != string :
                     
                     dico[string]=dico2
@@ -138,7 +143,6 @@ def coordonnees(liste):
         res["MODEL_"+str(modele)] = dico
         
     # On suppprime les dico vides
-    
     for cle in res.keys():
         for cle2 in res[cle].keys():
             if res[cle][cle2]=={}:
@@ -146,13 +150,26 @@ def coordonnees(liste):
         if res[cle]=={}:
             del(res[cle])
 
-        
     return res
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 def atome(liste):
+    """
+    Renvoie pour chaque atome de chaque chaine, le nom du résidu auquel il 
+    appartient, le numéro du residu et le nom de l’atome.
+    
+    Parameters
+    ----------
+    liste : list, liste obtenue avec la fonction lire_pdb()
+
+    Returns
+    -------
+    res :  dict, 
+        {modele :  [{nomResidus : str, nomAtome : str, numeroResidus : int}]}
+        
+    """
     modele = 0
     res = dict()
     dico = dict()
@@ -166,7 +183,6 @@ def atome(liste):
             dico = dict()
             liste_res=[]
             
-            
         if l[0:4] == "ATOM" :
             dico={}
             dico["nomAtome"] =  l[12:16].replace(" ","") 
@@ -177,18 +193,6 @@ def atome(liste):
         res["MODEL_"+str(modele)] = liste_res
        
     return res
-    
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-def main(nom_fichier = "1cll.pdb") :
-    fichier = lire_pdb(nom_fichier)
-    #print fichier
-    #print details(fichier)  
-    #print lecture_pdb_bis(fichier)    
-    print coordonnees(fichier)
-    #print atome(fichier)
-
-#main()
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 def trie(atome, liste,sel):
@@ -213,13 +217,23 @@ def trie(atome, liste,sel):
 
       
 def coord(dico,liste_coord):
+    """Permet de recuperer les coordonnees d'un atome d'un residus
+    
+    Parameters
+    ----------
+    dico : dict, {nomResidus : str, nomAtome : str, numeroResidus : int}
+    liste_coord :  dict, {residus : {atome : [coordonnees]}}
+    
+    Returns
+    -------
+    list,
+        liste de coordonnees correspondant a l'atome voulu
+    """
     liste_residus = liste_coord.keys()
     for i in liste_residus : 
         tmp = i.split("-")
         #print tmp
         if tmp[0] == dico['nomResidus'] and int(tmp[1]) == dico['numeroResidus']:
-            #print dico['nomResidus']
-            #print i, liste_coord[i]
             n=dico['nomAtome']
             return liste_coord[i][n]
 
@@ -296,52 +310,39 @@ def RMSD(coordonnees_1, liste_atomes_1,coordonnees_2, liste_atomes_2,sel_p1,sel_
     def trie(atome, liste,sel):
         """Recupere les elements qui nous interessent
         
+        Parameters
+        ----------
+        atome : str, atome considere
+        liste :  list, liste de dictionnaire ou chaque dictionnaire correspond 
+                    a : {nomAtome : str,  nomResidus : str, numeroResidus : int}
+        sel : list, liste de position qui nous interesse
+        
+        Returns 
+        -------
+        res : list,
+            liste des residus au position qui nous interesse
         """
         res = list()
         for i in liste : 
+
             if (i["nomAtome"] == atome) and (i["numeroResidus"] in sel): # and (i not in res) : 
                 res.append(i)
+
         return res
                  
     somme = 0.0
     trier1 = trie(atome,liste_atomes_1,sel_p1)
     trier2 = trie(atome,liste_atomes_2,sel_p2)
-
     
     if len(trier1) == len(trier2):
         
         for i in range (len(trier1)):
-            
             coord1 = coord(trier1[i],coordonnees_1)
             coord2 = coord(trier2[i],coordonnees_2)
-            #print coord1,coord2
-            #somme = somme + math.sqrt(calcul(coord1,coord2))
-            somme = somme + calcul(coord1,coord2)
-            #print i, somme
-            #print calcul(coord1,coord2)
             
-    #print math.sqrt(somme/len(trier1))
-    #print somme  
+            somme = somme + calcul(coord1,coord2)
+    
     return math.sqrt(somme/len(trier1))
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-#RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
-
-# Trouver la plus petite distance
-
-
-#for t in range(30):
-#    coord1 = coordonnees(fichier1)
-#    coord1 = coord1["MODEL_"+str(t)]
-#    at1 = atome(fichier1)
-#    at1=at1["MODEL_"+str(t)]
-#    Score = RMSD (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
-#
-#    if Score < s:
-#        s=Score
-#        i=t
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -367,9 +368,10 @@ def calcul_distance(P1,P2):
 
     
 def carte_contact(coordonnees):
-    """
-    retourne une matrice symétrique, 
-    des distances entre les 'CA' de tous les aa d'une meme proteine.
+    """Creation de carte de contact
+    
+    retourne une matrice symetrique, des distances entre les 'CA' de tous 
+    les aa d'une meme proteine.
     
     Parameters
     ----------
@@ -386,12 +388,9 @@ def carte_contact(coordonnees):
     
     liste_aa_ord= [0] *(len(coordonnees.keys())+10) 
 
-
     for aa1 in coordonnees.keys() :
         a = aa1.split()
         if len(a)==2 :
-            #print(type(int(a[1])))
-
             liste_aa_ord[int(a[1])]= aa1
     
     for i in range(1, len(liste_aa_ord)):
@@ -405,8 +404,6 @@ def carte_contact(coordonnees):
                     
                     matrice[i,j]=calcul_distance(p1,p2)
                                   
-                                  
-                                  
     # on enlève les colonnes et les lignes vides
     liste_vide=[]
                   
@@ -414,10 +411,8 @@ def carte_contact(coordonnees):
         if all(matrice[:,i]== [0] * dim ):
             liste_vide.append(i)
         
-        
     m= np.delete(matrice, liste_vide, axis=0)
     m= np.delete(m, liste_vide, axis=1)
-    
     
     return m
 
@@ -513,6 +508,7 @@ def CV_residus(rc,coordonnees):
     -------
     cv_res : dict, {residus : Cv} 
     """
+    
     res = dict()
     for i in coordonnees.keys() :
         tmp = dict()
@@ -527,12 +523,9 @@ def CV_residus(rc,coordonnees):
         somme = 0.
         if i != '' : 
             for atome in res[i].keys():
-                #print somme
                 somme+=res[i][atome]
-      
             cv_res[i] = somme/len(res[i].keys())
-            #print "sortie : ", somme/len(res[i].keys())
-    #print cv_res
+
     return cv_res
         
 def pourcentage(residus):
@@ -560,8 +553,8 @@ def pourcentage(residus):
             protuberant +=1
         else :
             enfoui +=1
-    print enfoui/len(residus.keys())
-    print protuberant /len(residus.keys()) 
+    #print enfoui/len(residus.keys())
+    #print protuberant /len(residus.keys()) 
     
     return (enfoui/len(residus.keys()),protuberant /len(residus.keys()))
         
@@ -597,44 +590,35 @@ def ecriture_pdb(valeur,liste,nom_fichier = "nouveau_fichier.pdb"):
     liste : list, donnees du fichier pdb, obtenu grace a la fonction lire_pdb()
     nom_fichier : str, nom du fichier qu'on souhaite donner, "nouveau_fichier.pdb"
                 est utilise comme nom par defaut
-                
 
-    
     """
     fichier = open(nom_fichier, "w")
     num_model = ""
     for i in liste :
-        if (' '.join(i.split(' ')).split())[0] == 'MODEL':
-            nb = eval((' '.join(i.split(' ')).split())[1])-1
-            num_model = "MODEL_"+str(nb)
-            #print num_model
-        
-            
-        if i[0:4] == 'ATOM':
-            #print num_model
-            #nomResidus = i[17:20]
-            #numeroResidus = int(i[22:26])
-            nom  = i[17:20] + "-"+i[22:26] 
-            #print nomResidus, numeroResidus
-            if num_model == "":
-                num_model = "MODEL_"+str(0)
-                
-            if nom in valeur[num_model].keys():
-                tmp = list(i)
-                val = list(str(valeur[num_model][nom]))
-                j=0
-                for i in range (61,66):
-                    tmp[i]=val[j]
-                    j+=1
-                #print tmp
-                i = ''.join(tmp)
-                #print tmp
-                
-        fichier.write(i) 
+        if  (' '.join(i.split(' ')).split())[0] != 'HETATM':
+            #print i
+            if (' '.join(i.split(' ')).split())[0] == 'MODEL':
+                nb = eval((' '.join(i.split(' ')).split())[1])-1
+                num_model = "MODEL_"+str(nb)
     
-    
-    
-    
+            if i[0:4] == 'ATOM':
+                nom  = i[17:20] + "-"+i[22:26] 
+                if num_model == "":
+                    num_model = "MODEL_"+str(0)
+                    
+                if nom in valeur[num_model].keys():
+                    tmp = list(i)
+                    val = list(str(valeur[num_model][nom]))
+                    j=0
+                    for i in range (61,66):
+                        tmp[i]=val[j]
+                        j+=1
+                    i = ''.join(tmp)
+                    
+            fichier.write(i) 
+        else :
+            pass
+ 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #  E. Champ de force
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -655,16 +639,6 @@ def ecriture_pdb(valeur,liste,nom_fichier = "nouveau_fichier.pdb"):
 # B_ij = 2 epsilon (Rij*)^6
 
 
-charge_PDB= ForceField.chargePDB()
-dvdw, depsilon =  ForceField.epsilon_vdw_PDB() 
-
-def calcul_distance(P1,P2):    
-
-    return math.sqrt(pow((P1[0]-P2[0]),2) + pow((P1[1]-P2[1]),2) + pow((P1[2]-P2[2]),2))
-
-
-#chargePDB[aa][atome]
-
 def calcul_Rij_etoile( aa1, atome1, aa2, atome2 ):
     vdw1 = dvdw[aa1][atome1]
     vdw2 = dvdw[aa2][atome2]
@@ -683,16 +657,6 @@ def calcul_A( epsilon_ij , Rij_etoile ):
 def calcul_B( epsilon_ij , Rij_etoile ):
     return 2 * epsilon_ij * math.pow(Rij_etoile, 6 )
 
-    
-#                    if at_j == "H2"  or at_j == "H3" or at_j == "OXT" :
-#				continue
-#			elif at_j == "H1":
-#				at_j = "H"
-#			elif res_j == "HIS":
-#				res_j = "HID"
-    
-
-
 def calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2)  :
     Rij_etoile= calcul_Rij_etoile( aa1, atome1, aa2, atome2 )
     epsilon_ij=calcul_epsilon_ij( aa1, atome1, aa2, atome2 )
@@ -702,20 +666,6 @@ def calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2)  :
     return (A / pow(R_ij, 12)) - (B / pow(R_ij,6))
     
 
-#aa1 = 'PRO'#'PRO-   1'
-#atome1= 'CA'
-#coord1 = [-22.132, 2.484, -2.791]
-#
-#aa2 = 'LEU'#'LEU-   4'
-#atome2='CA'
-#coord2=[-6.696, 22.003, 26.447]
-#
-#
-#print calcul_energie_vdw ( aa1, atome1,coord1, aa2, atome2 ,coord2) 
-
-
-
-
 def calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) :
     q1 = charge_PDB[aa1][atome1]
     q2 = charge_PDB[aa2][atome2]
@@ -724,10 +674,7 @@ def calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) :
     return f *  q1 * q2 / (20* R_ij) 
     
 
-
-#print calcul_coulomb( aa1, atome1,coord1, aa2, atome2 ,coord2) 
-
-    
+  
 def calcul_energie( prot1, prot2 ):
     energie=0.0
     for aa_i in prot1.keys():
@@ -776,86 +723,101 @@ def calcul_energie( prot1, prot2 ):
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
-  
-sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
-sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
 
-fichier1 = lire_pdb("3pdz.pdb")
-fichier2=lire_pdb("1cll.pdb")
-fichier3 = lire_pdb("1fcf_aliSeq.pdb")
-fichier4 = lire_pdb("2bbm.pdb")
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-#coord1 = coordonnees(fichier1)
-#coord1 = coord1["MODEL_0"]
-#at1 = atome(fichier1)
-#at1=at1["MODEL_0"]
-#
-#coord2 = coordonnees(fichier2)
-#coord2 = coord2["MODEL_0"]
-
-all_coord1 = coordonnees(fichier1)
-coord1 = all_coord1["MODEL_0"]
-at1 = atome(fichier1)
-at1=at1["MODEL_0"]
-
-all_coord2 = coordonnees(fichier2)
-coord2 = all_coord2["MODEL_0"]
+def main(nom_fichier = "1cll.pdb") :
+    fichier = lire_pdb(nom_fichier)
+    print fichier
+    print details(fichier)  
+    print lecture_dbref(fichier)    
+    print coordonnees(fichier)
+    print atome(fichier)
 
 
-at2 = atome(fichier2)
-at2=at2["MODEL_0"]
+if __name__ == "__main__":
+    #import doctest
+    #doctest.testmod()
+    
+    #main()
+    
+    sel3PDZ = range(21,25) + [26] + range(28,52) + range(53,69)
+    sel1FCF = range(159, 164) + range(165, 179) + range(184, 210)  
+    
+    fichier1 = lire_pdb("3pdz.pdb")
+    fichier2 = lire_pdb("1cll.pdb")
+    
+    fichier3 = lire_pdb("1fcf_aliSeq.pdb")
+    fichier4 = lire_pdb("2bbm.pdb")
+    
+    
+    all_coord1 = coordonnees(fichier1)
+    coord1 = all_coord1["MODEL_0"]
+    at1 = atome(fichier1)
+    at1=at1["MODEL_0"]
+    
+    all_coord2 = coordonnees(fichier2)
+    coord2 = all_coord2["MODEL_0"]
+    at2 = atome(fichier2)
+    at2=at2["MODEL_0"]
+    
+    all_coord3 = coordonnees(fichier3)
+    coord3 = all_coord3["MODEL_0"]
+    at3 = atome(fichier3)
+    at3=at3["MODEL_0"]
 
-coord4 = coordonnees(fichier4)
-#coord4 = coord4["MODEL_0"]
+    
+    charge_PDB= ForceField.chargePDB()
+    dvdw, depsilon =  ForceField.epsilon_vdw_PDB()     
+    
+    
+    
+    coord4 = coordonnees(fichier4)
+    
+    protein1=coord4['MODEL_0']
+    
+    protein2=coord4['MODEL_1']
+    
+    
+    print ("RMSD obtenu : {} ".format(RMSD(coord1, at1,coord3,at3,sel3PDZ,sel1FCF)))
 
-protein1=coord4['MODEL_0']
+    print ("Energie interne : {}".format(calcul_energie(protein1,protein2)))
 
-protein2=coord4['MODEL_1']
+    #print ("Carte de contact")
+    d1=carte_contact(coord1)
+    plt.figure()
+    plt.axis(  [0,len(d1) ,0,len(d1)])
+    pylab.pcolor(d1)
+    plt.colorbar()
+    plt.show()
 
-#print calcul_energie(coord1,coord2)
+    #d2=carte_contact(coord2)
+    #plt.figure()
+    #plt.axis(  [0,len(d2) ,0,len(d2)]    )
+    #pylab.pcolor(d2)
+    #plt.colorbar()
 
-
-calcul_energie( protein1, protein2 )
-
-
-
-"""
->>>>>>> a9f746f2e1811dc6093b176a72a68af715ea755f
-d1=carte_contact(coord1)
-plt.figure()
-plt.axis(  [0,len(d1) ,0,len(d1)]    )
-pylab.pcolor(d1)
-plt.colorbar()
-plt.show()
-#
-#d2=carte_contact(coord2)
-#plt.figure()
-#plt.axis(  [0,len(d2) ,0,len(d2)]    )
-#pylab.pcolor(d2)
-#plt.colorbar()
-#
-#
-##distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
-#print CV_i(20.0,[11.09, 1.768, 0.092],coord1)
-#
-#cv = CV_residus(20,coord1)
-#pourcentage(cv)
-
-"""
-
-#cv1 = cv_modele(all_coord1)
-cv2 = cv_modele(all_coord2)
-#ecriture_pdb(cv1,fichier1)
-ecriture_pdb(cv2,fichier2,nom_fichier = "nouveau_fichier2.pdb")
-#if __name__ == "__main__":
-#    import doctest
-#    doctest.testmod()
-
-
-
-
-
-
-
-
+    ##distance (coord1, at1,coord2,at2,sel3PDZ,sel1FCF)
+    #print CV_i(20.0,[11.09, 1.768, 0.092],coord1)
+    
+    cv = CV_residus(20,coord1)
+    enfoui,prot = pourcentage(cv)
+    print ("Pourcentage de residus enfoui {}% et pourcentage de residus protuberant {}% pour {}".format(enfoui,prot,"1cll.pdb"))
+    
+    
+    print ("---Calcul variance circulaire---")
+    cv2 = cv_modele(all_coord2)
+    print ("Cela peut prendre un peu de temps...")
+    cv1 = cv_modele(all_coord1)
+    print ("---Fin Calcule variance circulaire---")
+    print ("---Ecriture Fichier---")
+    ecriture_pdb(cv1,fichier1)
+    ecriture_pdb(cv2,fichier2,nom_fichier = "nouveau_fichier2.pdb")
+    print ("---Fin Ecriture Fichier---")
+    
+    
+    
+    
+    
+    
+    
