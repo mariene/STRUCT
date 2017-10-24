@@ -781,7 +781,7 @@ if __name__ == "__main__":
     
     print ("RMSD obtenu : {} ".format(RMSD(coord1, at1,coord3,at3,sel3PDZ,sel1FCF)))
 
-    print ("Energie interne : {}".format(calcul_energie(protein1,protein2)))
+    print ("Energie interaction : {}".format(calcul_energie(protein1,protein2)))
 
     #print ("Carte de contact")
     d1=carte_contact(coord1)
