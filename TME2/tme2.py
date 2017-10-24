@@ -111,9 +111,8 @@ def coordonnees(liste):
         if l[0:4] == "ATOM" :
                 i = ' '.join(l.split(' ')).split()
                 #atom=l[13:16]
-                atom=  l[13:16].split()[0]
-                #print 
-                #.split(' ')
+                atom=  l[12:16].split()[0]
+                # faut garder l[12:16]
                 
                 x= eval(l[31:38])
                 y= eval(l[39:46])
@@ -685,7 +684,12 @@ def calcul_B( epsilon_ij , Rij_etoile ):
     return 2 * epsilon_ij * math.pow(Rij_etoile, 6 )
 
     
-
+#                    if at_j == "H2"  or at_j == "H3" or at_j == "OXT" :
+#				continue
+#			elif at_j == "H1":
+#				at_j = "H"
+#			elif res_j == "HIS":
+#				res_j = "HID"
     
 
 
@@ -738,11 +742,9 @@ def calcul_energie( prot1, prot2 ):
             
             #print aa_i
             for aa_j in prot2.keys():
-                
-                    
                 if len(aa_j.split('-'))==2:
                     aa2 = aa_j.split('-')[0]
-                    print aa_j
+                    #print aa_j
                     
                     if aa2 =='HIS':
                         if 'HD1' in prot2[aa_j].keys():
@@ -751,18 +753,25 @@ def calcul_energie( prot1, prot2 ):
                             aa2 ='HIE'
                         
                     for atome_i in prot1[aa_i].keys():
-                        
-                        for atome_j in prot2[aa_j].keys():
-                            print('aa ' + aa_j)
-
-                            print('atome ' + atome_j)
+                        #print(atome_i)
+                        if atome_i!= "H2"  and  atome_i != "H3" and  atome_i != "OXT" :
                             coord1=prot1[aa_i][atome_i]
-                            coord2=prot2[aa_j][atome_j]
-                            VDW= calcul_energie_vdw ( aa1, atome_i,coord1, aa2, atome_j ,coord2) 
-                            Coulomb= calcul_coulomb( aa1, atome_i,coord1, aa2, atome_j ,coord2) 
-                            
-                            energie += VDW 
-                            energie += Coulomb
+
+                            if atome_i =='H1':
+                                atome_i='H'
+                            #print(atome_i)
+                            for atome_j in prot2[aa_j].keys():
+                                if atome_j!= "H2"  and  atome_j != "H3" and  atome_j != "OXT" :
+                                    coord2=prot2[aa_j][atome_j]
+                                    if atome_j =='H1':
+                                        atome_j='H'
+
+                                    VDW= calcul_energie_vdw ( aa1, atome_i,coord1, aa2, atome_j ,coord2) 
+                                    Coulomb= calcul_coulomb( aa1, atome_i,coord1, aa2, atome_j ,coord2) 
+                                    
+                                    energie += VDW 
+                                    energie += Coulomb
+                                    #print(energie)
     return energie
 
 
@@ -777,13 +786,13 @@ fichier3 = lire_pdb("1fcf_aliSeq.pdb")
 fichier4 = lire_pdb("2bbm.pdb")
 
 
-coord1 = coordonnees(fichier1)
-coord1 = coord1["MODEL_0"]
-at1 = atome(fichier1)
-at1=at1["MODEL_0"]
-
-coord2 = coordonnees(fichier2)
-coord2 = coord2["MODEL_0"]
+#coord1 = coordonnees(fichier1)
+#coord1 = coord1["MODEL_0"]
+#at1 = atome(fichier1)
+#at1=at1["MODEL_0"]
+#
+#coord2 = coordonnees(fichier2)
+#coord2 = coord2["MODEL_0"]
 
 all_coord1 = coordonnees(fichier1)
 coord1 = all_coord1["MODEL_0"]
@@ -807,8 +816,7 @@ protein2=coord4['MODEL_1']
 #print calcul_energie(coord1,coord2)
 
 
-
-
+calcul_energie( protein1, protein2 )
 
 
 
