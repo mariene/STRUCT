@@ -472,6 +472,7 @@ def CV_i(rc,coord_i,coordonnees):
     -------
     float, la variance circulaire 
     """
+
     #Recup tous les atomes ayant une distance inf a rc
     res_at = []
     
@@ -529,7 +530,7 @@ def CV_residus(rc,coordonnees):
             for atome in res[i].keys():
                 #print somme
                 somme+=res[i][atome]
-            
+      
             cv_res[i] = somme/len(res[i].keys())
             #print "sortie : ", somme/len(res[i].keys())
     #print cv_res
@@ -566,10 +567,71 @@ def pourcentage(residus):
     return (enfoui/len(residus.keys()),protuberant /len(residus.keys()))
         
     
-def ecriture_pdb(valeur,liste):
+def cv_modele(coordonnes):
+    """Calcule la variance circulaire pour tous les residus de chaque modele
+    
+    Parameters
+    ----------
+    coordonnes: dict, {modele : {aa : {atome : liste de coord}}}
+    
+    Returns
+    -------
+        modele : dict, {modele:{aa:variance circulaire}}
+    """
+    modeles = dict()
+    
+    for i in coordonnes.keys():
+        coord = coordonnes[i]
+        cv = CV_residus(20,coord)
+        modeles[i] = cv
+    
+    return modeles
+
+    
+def ecriture_pdb(valeur,liste,nom_fichier = "nouveau_fichier.pdb"):
     """Permet d'ecrire un fichier pdb avec les valeurs donnees en entree
     
+    Parameters
+    ----------
+    valeur : dict, {modele:{aa:variance circulaire}}, obtenu grace a la fonction
+            cv_modele()
+    liste : list, donnees du fichier pdb, obtenu grace a la fonction lire_pdb()
+    nom_fichier : str, nom du fichier qu'on souhaite donner, "nouveau_fichier.pdb"
+                est utilise comme nom par defaut
+                
+
+    
     """
+    fichier = open(nom_fichier, "w")
+    num_model = ""
+    for i in liste :
+        if (' '.join(i.split(' ')).split())[0] == 'MODEL':
+            nb = eval((' '.join(i.split(' ')).split())[1])-1
+            num_model = "MODEL_"+str(nb)
+            #print num_model
+        
+            
+        if i[0:4] == 'ATOM':
+            #print num_model
+            #nomResidus = i[17:20]
+            #numeroResidus = int(i[22:26])
+            nom  = i[17:20] + "-"+i[22:26] 
+            #print nomResidus, numeroResidus
+            if num_model == "":
+                num_model = "MODEL_"+str(0)
+                
+            if nom in valeur[num_model].keys():
+                tmp = list(i)
+                val = list(str(valeur[num_model][nom]))
+                j=0
+                for i in range (61,66):
+                    tmp[i]=val[j]
+                    j+=1
+                #print tmp
+                i = ''.join(tmp)
+                #print tmp
+                
+        fichier.write(i) 
     
     
     
@@ -702,16 +764,6 @@ def calcul_energie( prot1, prot2 ):
                             energie += VDW 
                             energie += Coulomb
     return energie
-    
-    
-    
-
-
-
-
-
-
-
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
@@ -724,6 +776,7 @@ fichier2=lire_pdb("1cll.pdb")
 fichier3 = lire_pdb("1fcf_aliSeq.pdb")
 fichier4 = lire_pdb("2bbm.pdb")
 
+
 coord1 = coordonnees(fichier1)
 coord1 = coord1["MODEL_0"]
 at1 = atome(fichier1)
@@ -731,6 +784,16 @@ at1=at1["MODEL_0"]
 
 coord2 = coordonnees(fichier2)
 coord2 = coord2["MODEL_0"]
+
+all_coord1 = coordonnees(fichier1)
+coord1 = all_coord1["MODEL_0"]
+at1 = atome(fichier1)
+at1=at1["MODEL_0"]
+
+all_coord2 = coordonnees(fichier2)
+coord2 = all_coord2["MODEL_0"]
+
+
 at2 = atome(fichier2)
 at2=at2["MODEL_0"]
 
@@ -749,6 +812,8 @@ protein2=coord4['MODEL_1']
 
 
 
+"""
+>>>>>>> a9f746f2e1811dc6093b176a72a68af715ea755f
 d1=carte_contact(coord1)
 plt.figure()
 plt.axis(  [0,len(d1) ,0,len(d1)]    )
@@ -768,7 +833,13 @@ plt.show()
 #
 #cv = CV_residus(20,coord1)
 #pourcentage(cv)
-#
+
+"""
+
+#cv1 = cv_modele(all_coord1)
+cv2 = cv_modele(all_coord2)
+#ecriture_pdb(cv1,fichier1)
+ecriture_pdb(cv2,fichier2,nom_fichier = "nouveau_fichier2.pdb")
 #if __name__ == "__main__":
 #    import doctest
 #    doctest.testmod()
